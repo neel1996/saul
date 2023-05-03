@@ -7,25 +7,23 @@
     },
     "ghcr.io/devcontainers/features/node:1": {}
   },
-"forwardPorts": [
-	5173
-],
-"customizations": {
-	"vscode": {
-		"extensions": [
-			"akamud.vscode-theme-onedark",
-			"dzannotti.vscode-babel-coloring",
-			"mgmcdermott.vscode-language-babel",
-			"dbaeumer.vscode-eslint",
-			"mhutchie.git-graph",
-			"donjayamanne.githistory",
-			"GitHub.copilot",
-			"eamodio.gitlens",
-			"golang.go",
-			"kavod-io.vscode-jest-test-adapter",
-			"christian-kohler.path-intellisense",
-			"bradlc.vscode-tailwindcss"
-		]
-	}
-}
+  "forwardPorts": [3000],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "akamud.vscode-theme-onedark",
+        "dzannotti.vscode-babel-coloring",
+        "mgmcdermott.vscode-language-babel",
+        "dbaeumer.vscode-eslint",
+        "mhutchie.git-graph",
+        "donjayamanne.githistory",
+        "GitHub.copilot",
+        "eamodio.gitlens",
+        "golang.go",
+        "kavod-io.vscode-jest-test-adapter",
+        "christian-kohler.path-intellisense",
+        "bradlc.vscode-tailwindcss"
+      ]
+    }
+  }
 }
