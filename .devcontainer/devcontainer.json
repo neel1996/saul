@@ -22,7 +22,11 @@
         "golang.go",
         "kavod-io.vscode-jest-test-adapter",
         "christian-kohler.path-intellisense",
-        "bradlc.vscode-tailwindcss"
+        "bradlc.vscode-tailwindcss",
+        "PKief.material-icon-theme",
+        "esbenp.prettier-vscode",
+        "rvest.vs-code-prettier-eslint",
+        "dsznajder.es7-react-js-snippets"
       ]
     }
   }
