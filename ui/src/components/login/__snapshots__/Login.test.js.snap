@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Login should render login component correctly 1`] = `
+<div>
+  <div
+    class="flex mx-auto my-auto w-1/2 h-full"
+  >
+    <div
+      class="bg-slate-600 p-6 rounded-md shadow-md w-full mx-auto my-auto"
+    />
+  </div>
+</div>
+`;
