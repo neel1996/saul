@@ -88,7 +88,9 @@ export default {
     // ],
 
     // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
-    // moduleNameMapper: {},
+    moduleNameMapper: {
+        "\\.(gif|ttf|eot|svg|png)$": "<rootDir>/__mocks__/fileMock.js",
+    },
 
     // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader
     // modulePathIgnorePatterns: [],
@@ -154,8 +156,8 @@ export default {
 
     // The glob patterns Jest uses to detect test files
     testMatch: [
-      "**/__tests__/**/*.[jt]s?(x)",
-      "**/?(*.)+(spec|test).[tj]s?(x)"
+        "**/__tests__/**/*.[jt]s?(x)",
+        "**/?(*.)+(spec|test).[tj]s?(x)",
     ],
 
     // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
@@ -178,10 +180,11 @@ export default {
     },
 
     // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
-    // transformIgnorePatterns: [
-    //   "\\\\node_modules\\\\",
-    //   "\\.pnp\\.[^\\\\]+$"
-    // ],
+    transformIgnorePatterns: [
+        "\\\\node_modules\\\\",
+        "\\.pnp\\.[^\\\\]+$",
+        "^.+\\.module\\.(css|sass|scss)$",
+    ],
 
     // An array of regexp pattern strings that are matched against all modules before the module loader will automatically return a mock for them
     // unmockedModulePathPatterns: undefined,
