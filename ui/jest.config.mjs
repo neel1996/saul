@@ -34,15 +34,17 @@ export default {
     coverageProvider: "v8",
 
     // A list of reporter names that Jest uses when writing coverage reports
-    // coverageReporters: [
-    //   "json",
-    //   "text",
-    //   "lcov",
-    //   "clover"
-    // ],
+    coverageReporters: ["json", "text", "lcov", "clover"],
 
     // An object that configures minimum threshold enforcement for coverage results
-    // coverageThreshold: undefined,
+    // coverageThreshold: {
+    //     global: {
+    //         branches: 80,
+    //         functions: 80,
+    //         lines: 80,
+    //         statements: 80,
+    //     },
+    // },
 
     // A path to a custom dependency extractor
     // dependencyExtractor: undefined,
@@ -75,21 +77,20 @@ export default {
     //   "node_modules"
     // ],
 
+    modulePaths: ["<rootDir>/src"],
+
     // An array of file extensions your modules use
-    // moduleFileExtensions: [
-    //   "js",
-    //   "mjs",
-    //   "cjs",
-    //   "jsx",
-    //   "ts",
-    //   "tsx",
-    //   "json",
-    //   "node"
-    // ],
+    moduleFileExtensions: ["js", "mjs", "cjs", "jsx", "json"],
 
     // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
     moduleNameMapper: {
         "\\.(gif|ttf|eot|svg|png)$": "<rootDir>/__mocks__/fileMock.js",
+        "^@root(.*)$": "<rootDir>/src$1",
+        "^@components(.*)$": "<rootDir>/src/components$1",
+        "^@services(.*)$": "<rootDir>/src/services$1",
+        "^@hooks(.*)$": "<rootDir>/src/hooks$1",
+        "^@assets(.*)$": "<rootDir>/src/assets$1",
+        "^@pages(.*)$": "<rootDir>/src/pages$1",
     },
 
     // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader

@@ -72,6 +72,7 @@ exports[`Login should render login component correctly 1`] = `
           >
             <div
               class="my-auto p-3 text-base border border-gray-600 transition-all rounded-full shadow-lg bg-gray-600 cursor-pointer hover:shadow-sm text-indigo-400"
+              data-testid="login-with-google"
             >
               <svg
                 aria-hidden="true"
@@ -91,6 +92,7 @@ exports[`Login should render login component correctly 1`] = `
             </div>
             <div
               class="my-auto p-3 text-base border border-gray-600 transition-all rounded-full shadow-lg bg-gray-600 cursor-pointer hover:shadow-sm text-indigo-400"
+              data-testid="login-with-github"
             >
               <svg
                 aria-hidden="true"

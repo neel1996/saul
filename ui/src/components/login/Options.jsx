@@ -1,16 +1,19 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub, faGoogle } from "@fortawesome/free-brands-svg-icons";
+import { loginWithGoogle, loginWithGithub } from "@services/login";
 
 export default function Options() {
     const loginOptions = [
         {
-            name: "Google",
+            name: "google",
             icon: faGoogle,
+            login: loginWithGoogle,
         },
         {
             name: "github",
             icon: faGithub,
+            login: loginWithGithub,
         },
     ];
 
@@ -26,7 +29,9 @@ export default function Options() {
                 {loginOptions.map((option) => (
                     <div
                         key={option.name}
+                        data-testid={`login-with-${option.name}`}
                         className="my-auto p-3 text-base border border-gray-600 transition-all rounded-full shadow-lg bg-gray-600 cursor-pointer hover:shadow-sm text-indigo-400"
+                        onClick={option.login}
                     >
                         <FontAwesomeIcon icon={option.icon} size="2x" />
                     </div>
