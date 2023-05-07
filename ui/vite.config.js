@@ -9,4 +9,13 @@ export default defineConfig({
         host: "0.0.0.0",
         base: "/",
     },
+    resolve: {
+        alias: {
+            "@": "/src",
+            "@assets": "/src/assets",
+            "@components": "/src/components",
+            "@hooks": "/src/hooks",
+            "@pages": "/src/pages",
+        },
+    },
 });

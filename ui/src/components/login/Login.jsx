@@ -1,7 +1,7 @@
 import React from "react";
 import Logo from "./Logo";
 import Options from "./Options";
-import BackgroundImage from "../../assets/background-overlay.png";
+import BackgroundImage from "@assets/background-overlay.png";
 
 export default function Login() {
     return (
