@@ -1,0 +1,83 @@
+name: UI Workflow
+
+on:
+  push:
+    paths:
+      - "ui/**"
+      - ".github/workflows/ui.yml"
+    branches: ["main"]
+  pull_request:
+    paths:
+      - "ui/**"
+      - ".github/workflows/ui.yml"
+    branches: ["main"]
+
+jobs:
+  lint:
+    name: Mimock formatting check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          cache: "yarn"
+
+      - name: Install dependencies
+        working-directory: ui
+        run: yarn
+
+      - name: Format check
+        working-directory: ui
+        run: yarn format:check
+
+      - name: Lint check
+        working-directory: ui
+        run: yarn lint:all
+
+  test:
+    needs: lint
+    name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          cache: "yarn"
+
+      - name: Install dependencies
+        working-directory: ui
+        run: yarn
+
+      - name: Run unit tests
+        working-directory: ui
+        run: yarn test
+
+  build:
+    needs: test
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          cache: "yarn"
+
+      - name: Install dependencies
+        working-directory: ui
+        run: yarn
+
+      - name: Build
+        working-directory: ui
+        run: yarn build
