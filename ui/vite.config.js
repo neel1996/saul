@@ -19,4 +19,9 @@ export default defineConfig({
             "@services": "/src/services",
         },
     },
+    css: {
+        postcss: {
+            plugins: [require("tailwindcss"), require("autoprefixer")],
+        },
+    },
 });
