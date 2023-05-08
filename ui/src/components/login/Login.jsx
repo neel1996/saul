@@ -18,7 +18,7 @@ export default function Login() {
                     backgroundPosition: "center",
                 }}
             >
-                <div className="bg-gray-700 p-6 rounded-lg shadow-lg w-1/2 mx-auto my-auto border border-gray-600">
+                <div className="bg-gray-700 p-6 rounded-lg shadow-lg w-11/12 md:w-1/2 xl:w-1/3 sm:w-11/12 mx-auto my-auto border border-gray-600">
                     <Logo />
                     <Options />
                 </div>
