@@ -12,7 +12,7 @@ export default function Logo() {
                 <div className="block items-center">
                     <div className="font-bold text-gray-300 text-6xl">Saul</div>
                     <div className="font-sans text-sm font-semibold text-indigo-300">
-                        Know what's in your document
+                        Know what is in your document
                     </div>
                 </div>
             </div>

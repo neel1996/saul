@@ -1,6 +1,6 @@
 import React from "react";
 import "@testing-library/jest-dom";
-import { act, fireEvent, render } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { loginWithGoogle, loginWithGithub } from "@services/login";
 import Login from "./Login";
 
@@ -13,36 +13,33 @@ describe("Login", () => {
     });
 
     it("should render login component correctly", async () => {
-        let tree = await render(<Login />);
-        const { findByTestId, container } = tree;
+        const { container } = await render(<Login />);
 
-        expect(await findByTestId("login")).toBeInTheDocument();
+        expect(await screen.findByTestId("login")).toBeInTheDocument();
 
         expect(container).toMatchSnapshot();
     });
 
     it("should login with google on click", async () => {
-        let tree = await render(<Login />);
-        const { findByTestId } = tree;
+        await render(<Login />);
 
-        const loginWithGoogleButton = await findByTestId("login-with-google");
+        const loginWithGoogleButton = await screen.findByTestId(
+            "login-with-google"
+        );
 
-        await act(async () => {
-            await fireEvent.click(loginWithGoogleButton);
-        });
+        await fireEvent.click(loginWithGoogleButton);
 
         expect(loginWithGoogle).toHaveBeenCalledTimes(1);
     });
 
     it("should login with github on click", async () => {
-        let tree = await render(<Login />);
-        const { findByTestId } = tree;
+        await render(<Login />);
 
-        const loginWithGithubButton = await findByTestId("login-with-github");
+        const loginWithGithubButton = await screen.findByTestId(
+            "login-with-github"
+        );
 
-        await act(async () => {
-            await fireEvent.click(loginWithGithubButton);
-        });
+        await fireEvent.click(loginWithGithubButton);
 
         expect(loginWithGithub).toHaveBeenCalledTimes(1);
     });
