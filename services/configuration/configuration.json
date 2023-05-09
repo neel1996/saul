@@ -1,0 +1,28 @@
+{
+  "port": "8080",
+  "cors": {
+    "allowedOrigins": [
+      "http://localhost:3000",
+      "http://localhost:8080"
+    ],
+    "allowedHeaders": [
+      "Content-Type",
+      "Authorization",
+      "X-Requested-With",
+      "Origin",
+      "Accept"
+    ],
+    "allowedMethods": [
+      "GET",
+      "POST",
+      "OPTIONS"
+    ]
+  },
+  "corsIgnoreUrls": [
+    "/health"
+  ],
+  "trustedProxies": [
+    "http://localhost:3000",
+    "http://localhost:8080"
+  ]
+}
