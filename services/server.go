@@ -1,9 +1,12 @@
 package main
 
-import "github.com/neel1996/saul/initializers"
+import (
+	"github.com/neel1996/saul/initializers"
+)
 
 func main() {
 	config := initializers.InitializeConfiguration()
+	initializers.InitializeObjects(config)
 
 	r := initializers.InitializeRoutes(config)
 

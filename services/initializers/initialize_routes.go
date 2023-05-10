@@ -9,11 +9,12 @@ import (
 
 func InitializeRoutes(config configuration.Configuration) *gin.Engine {
 	r := gin.Default()
+	r.Use(authMiddleware.Authenticate)
 	setupCORS(config, r)
 
-	r.Group("/api/saul/v1")
+	group := r.Group("/api/saul/v1")
 	{
-		r.GET("/health", func(c *gin.Context) {
+		group.GET("/health", func(c *gin.Context) {
 			c.JSON(200, gin.H{
 				"message": "OK",
 			})

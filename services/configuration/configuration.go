@@ -5,6 +5,7 @@ type Configuration struct {
 	Cors           Cors     `json:"cors" validate:"required"`
 	TrustedProxies []string `json:"trustedProxies" validate:"required"`
 	CorsIgnoreUrls []string `json:"corsIgnoreUrls" validate:"required"`
+	AuthIgnoreUrls []string `json:"authIgnoreUrls" validate:"required"`
 }
 
 type Cors struct {
