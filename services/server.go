@@ -6,7 +6,7 @@ import (
 
 func main() {
 	config := initializers.InitializeConfiguration()
-	initializers.InitializeObjects(config)
+	initializers.Bootstrap(config)
 
 	r := initializers.InitializeRoutes(config)
 
