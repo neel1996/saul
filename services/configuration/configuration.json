@@ -25,5 +25,10 @@
     "http://localhost:3000",
     "http://localhost:8080"
   ],
-  "authIgnoreUrls": []
+  "authIgnoreUrls": [],
+  "huggingFace": {
+    "documentQA": {
+      "endpoint": "https://api-inference.huggingface.co/models/impira/layoutlm-document-qa"
+    }
+  }
 }
