@@ -29,6 +29,7 @@ jobs:
         working-directory: services
         run: |
           go mod download
+          go generate ./...
 
       - name: Lint check
         uses: golangci/golangci-lint-action@v3
@@ -53,6 +54,7 @@ jobs:
         working-directory: services
         run: |
           go mod download
+          go generate ./...
 
       - name: Test
         working-directory: services
@@ -76,6 +78,7 @@ jobs:
         working-directory: services
         run: |
           go mod download
+          go generate ./...
 
       - name: Build
         working-directory: services
