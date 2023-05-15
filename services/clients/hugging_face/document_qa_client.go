@@ -51,7 +51,7 @@ func (d documentQAClient) Answer(ctx context.Context, question string, imageBase
 
 	if len(answers) == 0 {
 		logger.Info("No answer found")
-		return response.DocumentQAResponse{}, constants.DocumentQANoAnswerFound
+		return response.DocumentQAResponse{}, constants.DocumentQANoAnswerFoundError
 	}
 
 	logger.Infof("Returning answer received from DocumentQA API")

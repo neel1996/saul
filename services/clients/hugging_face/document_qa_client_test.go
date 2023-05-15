@@ -136,5 +136,5 @@ func (suite *DocumentQAClientTestSuite) TestAnswer_WhenNoAnswerFound_ShouldRetur
 	_, err := suite.client.Answer(suite.context, "question", "image")
 
 	suite.NotNil(err)
-	suite.Equal(constants.DocumentQANoAnswerFound, err)
+	suite.Equal(constants.DocumentQANoAnswerFoundError, err)
 }

@@ -5,16 +5,17 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+	"github.com/neel1996/saul/constants"
 )
 
 func (m migration) CreateDocumentHistoryTable(ctx context.Context) {
-	if m.tableMap[DocumentHistory] {
-		logger.Infof("%s table already exists", DocumentHistory)
+	if m.tableMap[constants.DocumentHistory] {
+		logger.Infof("%s table already exists", constants.DocumentHistory)
 		return
 	}
 
 	table, err := m.client.CreateTable(ctx, &dynamodb.CreateTableInput{
-		TableName:                 aws.String(DocumentHistory),
+		TableName:                 aws.String(constants.DocumentHistory),
 		DeletionProtectionEnabled: aws.Bool(true),
 		BillingMode:               types.BillingModePayPerRequest,
 		TableClass:                types.TableClassStandard,
@@ -59,7 +60,7 @@ func (m migration) CreateDocumentHistoryTable(ctx context.Context) {
 	})
 
 	if err != nil {
-		logger.Errorf("Error creating table %s : %v", DocumentHistory, err)
+		logger.Errorf("Error creating table %s : %v", constants.DocumentHistory, err)
 		return
 	}
 

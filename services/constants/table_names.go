@@ -1,4 +1,4 @@
-package migrations
+package constants
 
 const (
 	UserTableName   = "saul_users"

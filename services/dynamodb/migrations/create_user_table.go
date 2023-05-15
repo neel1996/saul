@@ -5,16 +5,17 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+	"github.com/neel1996/saul/constants"
 )
 
 func (m migration) CreateUserTable(ctx context.Context) {
-	if m.tableMap[UserTableName] {
-		logger.Infof("%s table already exists", UserTableName)
+	if m.tableMap[constants.UserTableName] {
+		logger.Infof("%s table already exists", constants.UserTableName)
 		return
 	}
 
 	table, err := m.client.CreateTable(ctx, &dynamodb.CreateTableInput{
-		TableName:                 aws.String(UserTableName),
+		TableName:                 aws.String(constants.UserTableName),
 		DeletionProtectionEnabled: aws.Bool(true),
 		BillingMode:               types.BillingModePayPerRequest,
 		TableClass:                types.TableClassStandard,
@@ -59,7 +60,7 @@ func (m migration) CreateUserTable(ctx context.Context) {
 	})
 
 	if err != nil {
-		logger.Errorf("Error creating table %s : %v", UserTableName, err)
+		logger.Errorf("Error creating table %s : %v", constants.UserTableName, err)
 		return
 	}
 
