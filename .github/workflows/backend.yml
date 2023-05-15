@@ -29,6 +29,7 @@ jobs:
         working-directory: services
         run: |
           go mod download
+          go install github.com/golang/mock/mockgen@v1.6.0
           go generate ./...
 
       - name: Lint check
@@ -54,6 +55,7 @@ jobs:
         working-directory: services
         run: |
           go mod download
+          go install github.com/golang/mock/mockgen@v1.6.0
           go generate ./...
 
       - name: Test
@@ -78,6 +80,7 @@ jobs:
         working-directory: services
         run: |
           go mod download
+          go install github.com/golang/mock/mockgen@v1.6.0
           go generate ./...
 
       - name: Build
