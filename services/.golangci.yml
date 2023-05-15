@@ -1,0 +1,24 @@
+run:
+  allow-parallel-runners: true
+  go: "1.20"
+
+linters:
+  disable-all: true
+
+  enable:
+    - gofmt
+    - forcetypeassert
+    - funlen
+    - govet
+
+linters-settings:
+  funlen:
+    lines: 100
+    statements: 40
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - funlen
+

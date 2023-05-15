@@ -31,7 +31,11 @@ func (h httpClient) Get(url string) error {
 	}
 
 	if response.IsError() {
-		return response.Error().(error)
+		err, ok := response.Error().(error)
+		if ok {
+			return err
+		}
+		return nil
 	}
 
 	return h.bindResponse(err, response)
@@ -44,7 +48,11 @@ func (h httpClient) Post(url string) error {
 	}
 
 	if response.IsError() {
-		return response.Error().(error)
+		err, ok := response.Error().(error)
+		if ok {
+			return err
+		}
+		return nil
 	}
 
 	return h.bindResponse(err, response)
