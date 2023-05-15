@@ -1,0 +1,87 @@
+name: Backend Workflow
+
+on:
+  push:
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend.yml"
+    branches: ["main"]
+  pull_request:
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend.yml"
+    branches: ["main"]
+
+jobs:
+  lint:
+    name: GolangCI Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.20"
+          cache: "go"
+          cache-dependency-path: backend/go.mod
+
+      - name: Install dependencies
+        working-directory: backend
+        run: |
+          go mod download
+
+      - name: Lint check
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: "v1.52.2"
+          working-directory: backend
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.20"
+          cache: "go"
+          cache-dependency-path: backend/go.mod
+
+      - name: Install dependencies
+        working-directory: backend
+        run: |
+          go mod download
+
+      - name: Test
+        working-directory: backend
+        run: |
+          go test -cover ./...
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.20"
+          cache: "go"
+          cache-dependency-path: backend/go.mod
+
+      - name: Install dependencies
+        working-directory: backend
+        run: |
+          go mod download
+
+      - name: Build
+        working-directory: backend
+        run: |
+          go build -o saul server.go
