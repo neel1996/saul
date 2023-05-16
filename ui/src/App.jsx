@@ -1,11 +1,29 @@
+import { useEffect, useState } from "react";
 import { RouterProvider } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 import { router } from "./Routes";
+import FullPageLoader from "./components/FullPageLoader";
 import { initializeFirebase } from "./firebase";
+import { useAxiosInterceptor } from "./useAxiosInterceptor";
 
 function App() {
-    initializeFirebase();
+    const [showLoader, setShowLoader] = useState(false);
 
-    return <RouterProvider router={router}></RouterProvider>;
+    useEffect(() => {
+        initializeFirebase();
+    }, []);
+
+    useAxiosInterceptor({ setShowLoader });
+
+    return (
+        <>
+            <ToastContainer limit={3} />
+            <RouterProvider router={router}></RouterProvider>
+            {showLoader && <FullPageLoader />}
+        </>
+    );
 }
 
 export default App;

@@ -17,7 +17,7 @@ exports[`Login should render login component correctly 1`] = `
           data-testid="logo"
         >
           <div
-            class="mx-auto flex align-middle items-center justify-center gap-4"
+            class="mx-auto flex align-middle items-center justify-center gap-4 select-none"
           >
             <div
               class="p-4 rounded-lg shadow-md bg-gray-600 text-indigo-400"
@@ -62,7 +62,7 @@ exports[`Login should render login component correctly 1`] = `
           data-testid="login-options"
         >
           <div
-            class="text-center text-base font-semibold text-gray-500"
+            class="text-center text-base font-semibold text-gray-500 select-none"
           >
             Sign in with
           </div>

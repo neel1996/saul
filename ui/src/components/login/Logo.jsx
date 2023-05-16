@@ -1,11 +1,11 @@
-import React from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBolt } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React from "react";
 
 export default function Logo() {
     return (
         <div data-testid="logo">
-            <div className="mx-auto flex align-middle items-center justify-center gap-4">
+            <div className="mx-auto flex align-middle items-center justify-center gap-4 select-none">
                 <div className="p-4 rounded-lg shadow-md bg-gray-600 text-indigo-400">
                     <FontAwesomeIcon icon={faBolt} size="2x" />
                 </div>
