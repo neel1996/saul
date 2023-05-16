@@ -1,5 +1,7 @@
 package repository
 
+//go:generate mockgen -destination=../mocks/mock_user_repository.go -package=mocks -source=user_repository.go
+
 import (
 	"context"
 	"github.com/aws/aws-sdk-go-v2/aws"
