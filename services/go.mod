@@ -13,6 +13,7 @@ require (
 	github.com/go-playground/validator/v10 v10.13.0
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/golang/mock v1.4.4
+	github.com/google/uuid v1.3.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.8.2

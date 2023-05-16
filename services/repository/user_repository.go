@@ -6,18 +6,97 @@ import (
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	dynamodbPkg "github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+	"github.com/google/uuid"
 	"github.com/neel1996/saul/constants"
 	"github.com/neel1996/saul/dynamodb"
 	"github.com/neel1996/saul/log"
 	"github.com/neel1996/saul/model/db"
+	"github.com/neel1996/saul/model/request"
 )
 
 type UserRepository interface {
 	GetUser(ctx context.Context, email string) (db.User, error)
+	CreateUser(ctx context.Context, request request.UserRequest) error
+	DoesUserExist(ctx context.Context, email string) (bool, error)
 }
 
 type userRepository struct {
 	dynamodbClient dynamodb.DynamoDBClient
+}
+
+func (repository userRepository) DoesUserExist(ctx context.Context, email string) (bool, error) {
+	logger := log.NewLogger(ctx)
+	logger.Infof("Checking if user with email: %s exists", email)
+
+	query := dynamodbPkg.QueryInput{
+		TableName: aws.String(constants.UserTableName),
+		ExpressionAttributeNames: map[string]string{
+			"#email": "email",
+		},
+		ExpressionAttributeValues: map[string]types.AttributeValue{
+			":email": &types.AttributeValueMemberS{
+				Value: email,
+			},
+		},
+		FilterExpression:       aws.String("#email = :email"),
+		Limit:                  aws.Int32(1),
+		ReturnConsumedCapacity: types.ReturnConsumedCapacityTotal,
+		Select:                 types.SelectCount,
+	}
+
+	output, err := repository.dynamodbClient.Query(ctx, &query)
+	if err != nil {
+		logger.Errorf("Error occurred while querying for user with email: %s, error: %v", email, err)
+		return false, err
+	}
+
+	if output.Count == 0 {
+		logger.Infof("User with email: %s does not exist", email)
+		return false, nil
+	}
+
+	return true, nil
+}
+
+func (repository userRepository) CreateUser(ctx context.Context, userRequest request.UserRequest) error {
+	logger := log.NewLogger(ctx)
+	logger.Infof("Creating new user with email: %s", userRequest.Email)
+
+	input := &dynamodbPkg.TransactWriteItemsInput{
+		TransactItems: []types.TransactWriteItem{
+			{
+				Put: &types.Put{
+					TableName: aws.String(constants.UserTableName),
+					Item: map[string]types.AttributeValue{
+						"email": &types.AttributeValueMemberS{
+							Value: userRequest.Email,
+						},
+						"name": &types.AttributeValueMemberS{
+							Value: userRequest.Name,
+						},
+						"avatar": &types.AttributeValueMemberS{
+							Value: userRequest.Avatar,
+						},
+						"userId": &types.AttributeValueMemberS{
+							Value: userRequest.UserId,
+						},
+					},
+				},
+			},
+		},
+		ClientRequestToken:          aws.String(uuid.NewString()),
+		ReturnConsumedCapacity:      types.ReturnConsumedCapacityTotal,
+		ReturnItemCollectionMetrics: types.ReturnItemCollectionMetricsSize,
+	}
+
+	_, err := repository.dynamodbClient.TransactWriteItems(ctx, input)
+	if err != nil {
+		logger.Errorf("Error creating user in DB %v", err)
+		return err
+	}
+
+	logger.Infof("Successfully created user with email: %s", userRequest.Email)
+	return nil
 }
 
 func (repository userRepository) GetUser(ctx context.Context, email string) (db.User, error) {

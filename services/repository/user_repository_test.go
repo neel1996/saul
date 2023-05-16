@@ -7,9 +7,11 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/golang/mock/gomock"
+	"github.com/google/uuid"
 	"github.com/neel1996/saul/constants"
 	"github.com/neel1996/saul/mocks"
 	"github.com/neel1996/saul/model/db"
+	"github.com/neel1996/saul/model/request"
 	"github.com/stretchr/testify/suite"
 	"testing"
 )
@@ -146,4 +148,141 @@ func (suite *UserRepositoryTestSuite) TestGetUser_WhenNoUsersMatchEmailID_Should
 
 	suite.NotNil(err)
 	suite.Equal(constants.UserNotFoundError, err)
+}
+
+func (suite *UserRepositoryTestSuite) TestCreateUser_ShouldCreateNewUser() {
+	userRequest := request.UserRequest{
+		UserId: uuid.NewString(),
+		Email:  "test@test.com",
+		Name:   "Test",
+		Avatar: "avatar.png",
+	}
+
+	suite.mockDynamodbClient.EXPECT().
+		TransactWriteItems(suite.context, gomock.Any()).
+		Return(nil, nil).Times(1)
+
+	err := suite.repository.CreateUser(suite.context, userRequest)
+
+	suite.Nil(err)
+}
+
+func (suite *UserRepositoryTestSuite) TestCreateUser_WhenUserCreationFails_ShouldReturnError() {
+	userRequest := request.UserRequest{
+		UserId: uuid.NewString(),
+		Email:  "test@test.com",
+		Name:   "Test",
+		Avatar: "avatar.png",
+	}
+
+	suite.mockDynamodbClient.EXPECT().
+		TransactWriteItems(suite.context, gomock.Any()).
+		Return(nil, errors.New("db unavailable")).
+		Times(1)
+
+	err := suite.repository.CreateUser(suite.context, userRequest)
+
+	suite.NotNil(err)
+}
+
+func (suite *UserRepositoryTestSuite) TestDoesUserExist_ShouldReturnTrue() {
+	email := "test@test.com"
+
+	query := dynamodb.QueryInput{
+		TableName: aws.String(constants.UserTableName),
+		ExpressionAttributeNames: map[string]string{
+			"#email": "email",
+		},
+		ExpressionAttributeValues: map[string]types.AttributeValue{
+			":email": &types.AttributeValueMemberS{
+				Value: email,
+			},
+		},
+		FilterExpression:       aws.String("#email = :email"),
+		Limit:                  aws.Int32(1),
+		ReturnConsumedCapacity: types.ReturnConsumedCapacityTotal,
+		Select:                 types.SelectCount,
+	}
+
+	output := &dynamodb.QueryOutput{
+		ConsumedCapacity: nil,
+		Count:            1,
+		ScannedCount:     1,
+	}
+
+	suite.mockDynamodbClient.EXPECT().
+		Query(suite.context, &query).
+		Return(output, nil).
+		Times(1)
+
+	exists, err := suite.repository.DoesUserExist(suite.context, email)
+
+	suite.Nil(err)
+	suite.True(exists)
+}
+
+func (suite *UserRepositoryTestSuite) TestDoesUserExist_WhenUserDoesNotExist_ShouldReturnFalse() {
+	email := "test1@test.com"
+
+	query := dynamodb.QueryInput{
+		TableName: aws.String(constants.UserTableName),
+		ExpressionAttributeNames: map[string]string{
+			"#email": "email",
+		},
+		ExpressionAttributeValues: map[string]types.AttributeValue{
+			":email": &types.AttributeValueMemberS{
+				Value: email,
+			},
+		},
+		FilterExpression:       aws.String("#email = :email"),
+		Limit:                  aws.Int32(1),
+		ReturnConsumedCapacity: types.ReturnConsumedCapacityTotal,
+		Select:                 types.SelectCount,
+	}
+
+	output := &dynamodb.QueryOutput{
+		ConsumedCapacity: nil,
+		Count:            0,
+		ScannedCount:     0,
+	}
+
+	suite.mockDynamodbClient.EXPECT().
+		Query(suite.context, &query).
+		Return(output, nil).
+		Times(1)
+
+	exists, err := suite.repository.DoesUserExist(suite.context, email)
+
+	suite.Nil(err)
+	suite.False(exists)
+}
+
+func (suite *UserRepositoryTestSuite) TestDoesUserExist_WhenQueryingFails_ShouldReturnError() {
+	email := "test1@test.com"
+
+	query := dynamodb.QueryInput{
+		TableName: aws.String(constants.UserTableName),
+		ExpressionAttributeNames: map[string]string{
+			"#email": "email",
+		},
+		ExpressionAttributeValues: map[string]types.AttributeValue{
+			":email": &types.AttributeValueMemberS{
+				Value: email,
+			},
+		},
+		FilterExpression:       aws.String("#email = :email"),
+		Limit:                  aws.Int32(1),
+		ReturnConsumedCapacity: types.ReturnConsumedCapacityTotal,
+		Select:                 types.SelectCount,
+	}
+
+	suite.mockDynamodbClient.EXPECT().
+		Query(suite.context, &query).
+		Return(nil, errors.New("failed to query")).
+		Times(1)
+
+	exists, err := suite.repository.DoesUserExist(suite.context, email)
+
+	suite.NotNil(err)
+	suite.False(exists)
 }

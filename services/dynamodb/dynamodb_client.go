@@ -10,10 +10,15 @@ import (
 type DynamoDBClient interface {
 	GetItem(ctx context.Context, input *dynamodb.GetItemInput) (*dynamodb.GetItemOutput, error)
 	Query(ctx context.Context, input *dynamodb.QueryInput) (*dynamodb.QueryOutput, error)
+	TransactWriteItems(ctx context.Context, input *dynamodb.TransactWriteItemsInput, opts ...func(*dynamodb.Options)) (*dynamodb.TransactWriteItemsOutput, error)
 }
 
 type dynamoDBClient struct {
 	dynamodbClient dynamodb.Client
+}
+
+func (c dynamoDBClient) TransactWriteItems(ctx context.Context, input *dynamodb.TransactWriteItemsInput, opts ...func(*dynamodb.Options)) (*dynamodb.TransactWriteItemsOutput, error) {
+	return c.dynamodbClient.TransactWriteItems(ctx, input, opts...)
 }
 
 func (c dynamoDBClient) Query(ctx context.Context, input *dynamodb.QueryInput) (*dynamodb.QueryOutput, error) {
