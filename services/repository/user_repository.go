@@ -18,7 +18,7 @@ import (
 
 type UserRepository interface {
 	GetUser(ctx context.Context, email string) (db.User, error)
-	CreateUser(ctx context.Context, request request.UserRequest) error
+	CreateUser(ctx context.Context, request request.UserLoginRequest) error
 	DoesUserExist(ctx context.Context, email string) (bool, error)
 }
 
@@ -60,7 +60,7 @@ func (repository userRepository) DoesUserExist(ctx context.Context, email string
 	return true, nil
 }
 
-func (repository userRepository) CreateUser(ctx context.Context, userRequest request.UserRequest) error {
+func (repository userRepository) CreateUser(ctx context.Context, userRequest request.UserLoginRequest) error {
 	logger := log.NewLogger(ctx)
 	logger.Infof("Creating new user with email: %s", userRequest.Email)
 

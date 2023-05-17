@@ -39,7 +39,7 @@ func (suite *UserLoginServiceTestSuite) TearDownTest() {
 }
 
 func (suite *UserLoginServiceTestSuite) TestLogin_WhenUserAlreadyExists_ShouldReturnAuthToken() {
-	userRequest := request.UserRequest{
+	userRequest := request.UserLoginRequest{
 		UserId: "123",
 		Email:  "test@test.com",
 		Name:   "Test",
@@ -67,7 +67,7 @@ func (suite *UserLoginServiceTestSuite) TestLogin_WhenUserAlreadyExists_ShouldRe
 }
 
 func (suite *UserLoginServiceTestSuite) TestLogin_WhenUserIsNew_ShouldCreatedUserAndReturnAuthToken() {
-	userRequest := request.UserRequest{
+	userRequest := request.UserLoginRequest{
 		UserId: "123",
 		Email:  "test@test.com",
 		Name:   "Test",
@@ -100,7 +100,7 @@ func (suite *UserLoginServiceTestSuite) TestLogin_WhenUserIsNew_ShouldCreatedUse
 }
 
 func (suite *UserLoginServiceTestSuite) TestLogin_WhenUserExistenceCheckFails_ShouldReturnError() {
-	userRequest := request.UserRequest{
+	userRequest := request.UserLoginRequest{
 		UserId: "123",
 		Email:  "test@test.com",
 		Name:   "Test",
@@ -118,7 +118,7 @@ func (suite *UserLoginServiceTestSuite) TestLogin_WhenUserExistenceCheckFails_Sh
 }
 
 func (suite *UserLoginServiceTestSuite) TestLogin_WhenUserCreationFails_ShouldReturnError() {
-	userRequest := request.UserRequest{
+	userRequest := request.UserLoginRequest{
 		UserId: "123",
 		Email:  "test@test.com",
 		Name:   "Test",

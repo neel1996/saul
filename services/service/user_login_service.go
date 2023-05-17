@@ -1,5 +1,7 @@
 package service
 
+//go:generate mockgen -destination=../mocks/mock_user_login_service.go -package=mocks -source=user_login_service.go
+
 import (
 	"context"
 	"github.com/neel1996/saul/clients"
@@ -12,7 +14,7 @@ import (
 )
 
 type UserLoginService interface {
-	Login(ctx context.Context, userRequest request.UserRequest) (response.UserLoginResponse, error)
+	Login(ctx context.Context, userRequest request.UserLoginRequest) (response.UserLoginResponse, error)
 }
 
 type userValidationService struct {
@@ -20,7 +22,7 @@ type userValidationService struct {
 	firebaseClient clients.FirebaseClient
 }
 
-func (service userValidationService) Login(ctx context.Context, userRequest request.UserRequest) (response.UserLoginResponse, error) {
+func (service userValidationService) Login(ctx context.Context, userRequest request.UserLoginRequest) (response.UserLoginResponse, error) {
 	logger := log.NewLogger(ctx).WithFields(logrus.Fields{
 		"method": "Login",
 		"email":  userRequest.Email,
@@ -52,7 +54,7 @@ func (service userValidationService) Login(ctx context.Context, userRequest requ
 	}, nil
 }
 
-func (service userValidationService) getToken(ctx context.Context, userRequest request.UserRequest) (string, error) {
+func (service userValidationService) getToken(ctx context.Context, userRequest request.UserLoginRequest) (string, error) {
 	logger := log.NewLogger(ctx)
 	logger.Info("Generating auth token for user")
 

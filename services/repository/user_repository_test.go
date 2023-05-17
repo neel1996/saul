@@ -151,7 +151,7 @@ func (suite *UserRepositoryTestSuite) TestGetUser_WhenNoUsersMatchEmailID_Should
 }
 
 func (suite *UserRepositoryTestSuite) TestCreateUser_ShouldCreateNewUser() {
-	userRequest := request.UserRequest{
+	userRequest := request.UserLoginRequest{
 		UserId: uuid.NewString(),
 		Email:  "test@test.com",
 		Name:   "Test",
@@ -168,7 +168,7 @@ func (suite *UserRepositoryTestSuite) TestCreateUser_ShouldCreateNewUser() {
 }
 
 func (suite *UserRepositoryTestSuite) TestCreateUser_WhenUserCreationFails_ShouldReturnError() {
-	userRequest := request.UserRequest{
+	userRequest := request.UserLoginRequest{
 		UserId: uuid.NewString(),
 		Email:  "test@test.com",
 		Name:   "Test",
