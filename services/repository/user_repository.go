@@ -14,6 +14,7 @@ import (
 	"github.com/neel1996/saul/log"
 	"github.com/neel1996/saul/model/db"
 	"github.com/neel1996/saul/model/request"
+	"time"
 )
 
 type UserRepository interface {
@@ -40,7 +41,7 @@ func (repository userRepository) DoesUserExist(ctx context.Context, email string
 				Value: email,
 			},
 		},
-		FilterExpression:       aws.String("#email = :email"),
+		KeyConditionExpression: aws.String("#email = :email"),
 		Limit:                  aws.Int32(1),
 		ReturnConsumedCapacity: types.ReturnConsumedCapacityTotal,
 		Select:                 types.SelectCount,
@@ -79,8 +80,11 @@ func (repository userRepository) CreateUser(ctx context.Context, userRequest req
 						"avatar": &types.AttributeValueMemberS{
 							Value: userRequest.Avatar,
 						},
-						"userId": &types.AttributeValueMemberS{
+						"user_id": &types.AttributeValueMemberS{
 							Value: userRequest.UserId,
+						},
+						"created_at": &types.AttributeValueMemberS{
+							Value: time.Now().String(),
 						},
 					},
 				},

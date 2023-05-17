@@ -21,7 +21,7 @@ func (m migration) CreateUserTable(ctx context.Context) {
 		TableClass:                types.TableClassStandard,
 		KeySchema: []types.KeySchemaElement{
 			{
-				AttributeName: aws.String("user_id"),
+				AttributeName: aws.String("email"),
 				KeyType:       types.KeyTypeHash,
 			},
 			{
@@ -31,10 +31,10 @@ func (m migration) CreateUserTable(ctx context.Context) {
 		},
 		LocalSecondaryIndexes: []types.LocalSecondaryIndex{
 			{
-				IndexName: aws.String("user_id-created_at-index"),
+				IndexName: aws.String("email-created_at-index"),
 				KeySchema: []types.KeySchemaElement{
 					{
-						AttributeName: aws.String("user_id"),
+						AttributeName: aws.String("email"),
 						KeyType:       types.KeyTypeHash,
 					},
 					{
@@ -49,7 +49,7 @@ func (m migration) CreateUserTable(ctx context.Context) {
 		},
 		AttributeDefinitions: []types.AttributeDefinition{
 			{
-				AttributeName: aws.String("user_id"),
+				AttributeName: aws.String("email"),
 				AttributeType: types.ScalarAttributeTypeS,
 			},
 			{
