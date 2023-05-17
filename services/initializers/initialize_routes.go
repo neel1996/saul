@@ -19,6 +19,7 @@ func InitializeRoutes(config configuration.Configuration) *gin.Engine {
 				"message": "OK",
 			})
 		})
+		group.POST("/login", loginController.Login)
 	}
 
 	return r

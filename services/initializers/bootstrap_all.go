@@ -8,11 +8,15 @@ import (
 
 func Bootstrap(config configuration.Configuration) {
 	firebaseAuth := InitializeFirebaseAuth(context.Background())
-	InitializeMiddlewares(config, firebaseAuth)
 
 	// DB setup
 	dynamoDb := InitializeDynamoDb()
 	migrations.NewMigration(dynamoDb).Setup()
 
-	InitializeClients(config, dynamoDb)
+	// Initialize block
+	InitializeMiddlewares(config, firebaseAuth)
+	InitializeClients(config, dynamoDb, firebaseAuth)
+	InitializeRepositories()
+	InitializeServices()
+	InitializeControllers()
 }
