@@ -2,14 +2,14 @@ import { loginWithGoogle, loginWithGithub } from "@services/login";
 import "@testing-library/jest-dom";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
-import { redirect } from "react-router-dom";
 
 import Login from "./Login";
 
+const mockedUseNavigate = jest.fn();
 jest.mock("@services/login");
 jest.mock("react-router-dom", () => ({
     ...jest.requireActual("react-router-dom"),
-    redirect: jest.fn(),
+    useNavigate: () => mockedUseNavigate,
 }));
 
 describe("Login", () => {
@@ -41,8 +41,8 @@ describe("Login", () => {
         });
 
         expect(loginWithGoogle).toHaveBeenCalledTimes(1);
-        expect(redirect).toHaveBeenCalledTimes(1);
-        expect(redirect).toHaveBeenCalledWith("/");
+        expect(mockedUseNavigate).toHaveBeenCalledTimes(1);
+        expect(mockedUseNavigate).toHaveBeenCalledWith("/dashboard");
     });
 
     it("should login with github on click", async () => {
@@ -60,7 +60,7 @@ describe("Login", () => {
         });
 
         expect(loginWithGithub).toHaveBeenCalledTimes(1);
-        expect(redirect).toHaveBeenCalledTimes(1);
-        expect(redirect).toHaveBeenCalledWith("/");
+        expect(mockedUseNavigate).toHaveBeenCalledTimes(1);
+        expect(mockedUseNavigate).toHaveBeenCalledWith("/dashboard");
     });
 });

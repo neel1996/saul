@@ -21,7 +21,7 @@ function App() {
         <>
             <ToastContainer limit={3} />
             <RouterProvider router={router}></RouterProvider>
-            {showLoader && <FullPageLoader />}
+            {showLoader && <FullPageLoader showLoader={showLoader} />}
         </>
     );
 }

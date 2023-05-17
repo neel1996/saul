@@ -21,7 +21,7 @@ export const useAxiosInterceptor = ({ setShowLoader }) => {
         },
         (error) => {
             setShowLoader(false);
-            toast(error.message || "Something went wrong!", {
+            toast(error?.response?.data?.message || "Something went wrong!", {
                 toastId: "errorToast",
                 position: "bottom-center",
                 autoClose: 5000,

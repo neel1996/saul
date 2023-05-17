@@ -1,10 +1,11 @@
-import { validateUser } from "@services/user/validateUser";
 import {
     getAuth,
     signInWithPopup,
     GoogleAuthProvider,
     GithubAuthProvider,
 } from "firebase/auth";
+
+import { login } from "./userLogin";
 
 export const loginWithGoogle = async () => {
     const auth = getAuth();
@@ -26,6 +27,10 @@ const authenticatedUser = async (response) => {
     const { user } = response;
     const authToken = user.accessToken;
 
+    if (!authToken) {
+        throw new Error("Invalid credentials");
+    }
+
     sessionStorage.setItem("authToken", authToken);
 
     const userDetails = {
@@ -35,7 +40,7 @@ const authenticatedUser = async (response) => {
         avatar: user?.photoURL,
     };
 
-    await validateUser(userDetails);
+    await login(userDetails);
 
     return userDetails;
 };

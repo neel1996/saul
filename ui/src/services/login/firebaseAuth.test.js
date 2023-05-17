@@ -1,4 +1,3 @@
-import { validateUser } from "@services/user/validateUser";
 import {
     getAuth,
     signInWithPopup,
@@ -7,8 +6,9 @@ import {
 } from "firebase/auth";
 
 import { loginWithGoogle, loginWithGithub } from "./firebaseAuth";
+import { login } from "./userLogin";
 
-jest.mock("@services/user/validateUser");
+jest.mock("./userLogin");
 jest.mock("@root/AxiosInstance");
 jest.mock("firebase/auth");
 
@@ -25,6 +25,7 @@ describe("firebaseAuth", () => {
                 displayName: "John Doe",
                 email: "test@test.com",
                 photoURL: "https://test.com",
+                accessToken: "testAuthToken",
             },
         });
     });
@@ -38,8 +39,8 @@ describe("firebaseAuth", () => {
             getAuth(),
             new GoogleAuthProvider()
         );
-        expect(validateUser).toHaveBeenCalledTimes(1);
-        expect(validateUser).toHaveBeenCalledWith({
+        expect(login).toHaveBeenCalledTimes(1);
+        expect(login).toHaveBeenCalledWith({
             userId: "123",
             name: "John Doe",
             email: "test@test.com",
@@ -56,8 +57,8 @@ describe("firebaseAuth", () => {
             getAuth(),
             new GithubAuthProvider()
         );
-        expect(validateUser).toHaveBeenCalledTimes(1);
-        expect(validateUser).toHaveBeenCalledWith({
+        expect(login).toHaveBeenCalledTimes(1);
+        expect(login).toHaveBeenCalledWith({
             userId: "123",
             name: "John Doe",
             email: "test@test.com",

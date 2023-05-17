@@ -2,12 +2,13 @@ import { faGithub, faGoogle } from "@fortawesome/free-brands-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { loginWithGoogle, loginWithGithub } from "@services/login";
 import React, { useState } from "react";
-import { redirect } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import FullPageLoader from "../FullPageLoader";
 
 export default function Options() {
     const [showLoader, setShowLoader] = useState(false);
+    const navigate = useNavigate();
 
     const loginHandler = (loginPromise) => {
         setShowLoader(true);
@@ -15,10 +16,11 @@ export default function Options() {
         loginPromise
             .then(() => {
                 setShowLoader(false);
-                redirect("/");
+                return navigate("/dashboard");
             })
-            .catch(() => {
+            .catch((err) => {
                 setShowLoader(false);
+                throw err;
             });
     };
 
