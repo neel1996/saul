@@ -2,47 +2,75 @@ package service
 
 import (
 	"context"
+	"github.com/neel1996/saul/clients"
 	"github.com/neel1996/saul/constants"
 	"github.com/neel1996/saul/log"
 	"github.com/neel1996/saul/model/request"
+	"github.com/neel1996/saul/model/response"
 	"github.com/neel1996/saul/repository"
+	"github.com/sirupsen/logrus"
 )
 
 type UserLoginService interface {
-	Login(ctx context.Context, userRequest request.UserRequest) (constants.UserStatus, error)
+	Login(ctx context.Context, userRequest request.UserRequest) (response.UserLoginResponse, error)
 }
 
 type userValidationService struct {
-	repository repository.UserRepository
+	repository     repository.UserRepository
+	firebaseClient clients.FirebaseClient
 }
 
-func (service userValidationService) Login(ctx context.Context, userRequest request.UserRequest) (constants.UserStatus, error) {
-	logger := log.NewLogger(ctx)
-	logger.Infof("Validating user with email: %s", userRequest.Email)
+func (service userValidationService) Login(ctx context.Context, userRequest request.UserRequest) (response.UserLoginResponse, error) {
+	logger := log.NewLogger(ctx).WithFields(logrus.Fields{
+		"method": "Login",
+		"email":  userRequest.Email,
+	})
+	logger.Info("Logging in user")
 
 	exist, err := service.repository.DoesUserExist(ctx, userRequest.Email)
 	if err != nil {
-		logger.Errorf("Error occurred while checking if user with email: %s exists, error: %v", userRequest.Email, err)
-		return constants.NoStatus, constants.UserLoginError
+		logger.Errorf("Error occurred while checking if user exists, error: %v", err)
+		return response.UserLoginResponse{}, constants.UserLoginError
 	}
 
-	if exist {
-		logger.Infof("User with email: %s already exists", userRequest.Email)
-		return constants.ExistingUser, nil
+	if !exist {
+		logger.Info("Creating new user")
+		err = service.repository.CreateUser(ctx, userRequest)
+		if err != nil {
+			logger.Errorf("Error occurred while creating new user, error: %v", err)
+			return response.UserLoginResponse{}, constants.UserLoginError
+		}
 	}
 
-	logger.Infof("Creating new user with email: %s", userRequest.Email)
-	err = service.repository.CreateUser(ctx, userRequest)
+	authToken, err := service.getToken(ctx, userRequest)
 	if err != nil {
-		logger.Errorf("Error occurred while creating new user with email: %s, error: %v", userRequest.Email, err)
-		return constants.NoStatus, constants.UserLoginError
+		return response.UserLoginResponse{}, constants.UserLoginError
 	}
 
-	return constants.NewUser, nil
+	return response.UserLoginResponse{
+		AuthToken: authToken,
+	}, nil
 }
 
-func NewUserLoginService(repository repository.UserRepository) UserLoginService {
+func (service userValidationService) getToken(ctx context.Context, userRequest request.UserRequest) (string, error) {
+	logger := log.NewLogger(ctx)
+	logger.Info("Generating auth token for user")
+
+	authToken, err := service.firebaseClient.GenerateAuthToken(ctx, userRequest.UserId)
+	if err != nil {
+		logger.Errorf("Error occurred while generating auth token, error: %v", err)
+		return "", err
+	}
+
+	return authToken, nil
+}
+
+func NewUserLoginService(
+	repository repository.UserRepository,
+	firebaseClient clients.FirebaseClient,
+) UserLoginService {
 	return userValidationService{
 		repository,
+		firebaseClient,
 	}
 }

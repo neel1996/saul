@@ -7,6 +7,7 @@ import (
 	"github.com/neel1996/saul/constants"
 	"github.com/neel1996/saul/mocks"
 	"github.com/neel1996/saul/model/request"
+	"github.com/neel1996/saul/model/response"
 	"github.com/stretchr/testify/suite"
 	"testing"
 )
@@ -16,6 +17,7 @@ type UserLoginServiceTestSuite struct {
 	context            context.Context
 	mockController     *gomock.Controller
 	mockUserRepository *mocks.MockUserRepository
+	mockFirebaseClient *mocks.MockFirebaseClient
 	service            UserLoginService
 }
 
@@ -27,15 +29,16 @@ func (suite *UserLoginServiceTestSuite) SetupTest() {
 	suite.context = context.Background()
 	suite.mockController = gomock.NewController(suite.T())
 	suite.mockUserRepository = mocks.NewMockUserRepository(suite.mockController)
+	suite.mockFirebaseClient = mocks.NewMockFirebaseClient(suite.mockController)
 
-	suite.service = NewUserLoginService(suite.mockUserRepository)
+	suite.service = NewUserLoginService(suite.mockUserRepository, suite.mockFirebaseClient)
 }
 
 func (suite *UserLoginServiceTestSuite) TearDownTest() {
 	suite.mockController.Finish()
 }
 
-func (suite *UserLoginServiceTestSuite) TestLogin_WhenUserAlreadyExists_ShouldReturnExistingUserStatus() {
+func (suite *UserLoginServiceTestSuite) TestLogin_WhenUserAlreadyExists_ShouldReturnAuthToken() {
 	userRequest := request.UserRequest{
 		UserId: "123",
 		Email:  "test@test.com",
@@ -43,23 +46,36 @@ func (suite *UserLoginServiceTestSuite) TestLogin_WhenUserAlreadyExists_ShouldRe
 		Avatar: "https://test.com",
 	}
 
+	expected := response.UserLoginResponse{
+		AuthToken: "token",
+	}
+
 	suite.mockUserRepository.EXPECT().
 		DoesUserExist(suite.context, userRequest.Email).
 		Return(true, nil).
 		Times(1)
 
-	status, err := suite.service.Login(suite.context, userRequest)
+	suite.mockFirebaseClient.EXPECT().
+		GenerateAuthToken(suite.context, userRequest.UserId).
+		Return("token", nil).
+		Times(1)
+
+	loginResponse, err := suite.service.Login(suite.context, userRequest)
 
 	suite.Nil(err)
-	suite.Equal(constants.ExistingUser, status)
+	suite.Equal(expected, loginResponse)
 }
 
-func (suite *UserLoginServiceTestSuite) TestLogin_WhenUserIsNew_ShouldCreatedUserAndReturnNewUserStatus() {
+func (suite *UserLoginServiceTestSuite) TestLogin_WhenUserIsNew_ShouldCreatedUserAndReturnAuthToken() {
 	userRequest := request.UserRequest{
 		UserId: "123",
 		Email:  "test@test.com",
 		Name:   "Test",
 		Avatar: "https://test.com",
+	}
+
+	expected := response.UserLoginResponse{
+		AuthToken: "token",
 	}
 
 	suite.mockUserRepository.EXPECT().
@@ -72,10 +88,15 @@ func (suite *UserLoginServiceTestSuite) TestLogin_WhenUserIsNew_ShouldCreatedUse
 		Return(nil).
 		Times(1)
 
-	status, err := suite.service.Login(suite.context, userRequest)
+	suite.mockFirebaseClient.EXPECT().
+		GenerateAuthToken(suite.context, userRequest.UserId).
+		Return("token", nil).
+		Times(1)
+
+	loginResponse, err := suite.service.Login(suite.context, userRequest)
 
 	suite.Nil(err)
-	suite.Equal(constants.NewUser, status)
+	suite.Equal(expected, loginResponse)
 }
 
 func (suite *UserLoginServiceTestSuite) TestLogin_WhenUserExistenceCheckFails_ShouldReturnError() {
@@ -91,10 +112,9 @@ func (suite *UserLoginServiceTestSuite) TestLogin_WhenUserExistenceCheckFails_Sh
 		Return(false, errors.New("failed to check user")).
 		Times(1)
 
-	status, err := suite.service.Login(suite.context, userRequest)
+	_, err := suite.service.Login(suite.context, userRequest)
 
 	suite.NotNil(err)
-	suite.Equal(constants.NoStatus, status)
 }
 
 func (suite *UserLoginServiceTestSuite) TestLogin_WhenUserCreationFails_ShouldReturnError() {
@@ -115,9 +135,8 @@ func (suite *UserLoginServiceTestSuite) TestLogin_WhenUserCreationFails_ShouldRe
 		Return(errors.New("failed to create user")).
 		Times(1)
 
-	status, err := suite.service.Login(suite.context, userRequest)
+	_, err := suite.service.Login(suite.context, userRequest)
 
 	suite.NotNil(err)
 	suite.Equal(constants.UserLoginError, err)
-	suite.Equal(constants.NoStatus, status)
 }
