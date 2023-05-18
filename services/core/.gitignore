@@ -1,0 +1,9 @@
+.env
+service-account.json
+
+mocks/
+vendor/
+.run/
+
+saul
+saul.exe
