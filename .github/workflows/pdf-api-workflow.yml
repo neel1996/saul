@@ -45,8 +45,9 @@ jobs:
           pip install -r services/pdf-api/requirements.txt
 
       - name: Run tests
+        working-directory: services/pdf-api
         run: |
-          python -m unittest services/pdf-api/test_convert_pdf_to_image.py
+          python -m unittest test_convert_pdf_to_image.py
 
       - name: Stop docker compose
         run: docker-compose -f services/pdf-api/docker-compose.yml down
