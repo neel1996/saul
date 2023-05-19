@@ -32,8 +32,14 @@ minio_client = Minio(
 )
 
 
-def convert():
+def convert(limit_messages=None):
+    message_counter = 0
     for message in consumer:
+        if limit_messages is not None and message_counter == limit_messages:
+            logging.info("Reached message limit")
+            break
+
+        message_counter += 1
         logging.info("Received message from Kafka: %s", message.value)
         parsed_message = json.loads(message.value.decode("utf-8"))
 
