@@ -4,6 +4,7 @@ config = {
     "kafka": {
         "brokerURL": "localhost:9092",
         "topic": "process-document",
-        "groupId": "process-document-group"
+        "groupId": "process-document-group",
+        "statusTopic": "process-document-status",
     }
 }

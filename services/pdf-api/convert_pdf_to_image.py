@@ -5,6 +5,7 @@ from kafka import KafkaConsumer
 from minio import Minio
 from config import config
 from pdf2image import convert_from_bytes
+from status_notification_service import notify_status
 
 import os
 import logging
@@ -67,8 +68,10 @@ def convert():
             logging.info("Successfully uploaded %d images to Minio", len(images))
             logging.info("Document with checksum %s converted successfully", checksum)
             consumer.commit()
+            notify_status(checksum, "success")
         except Exception as e:
             logging.error("Error during PDF conversion: %s", e)
+            notify_status(checksum, "error")
             consumer.commit()
             consumer.close()
             raise e
