@@ -2,12 +2,12 @@ name: pdf-api workflow
 
 on:
   push:
-    branches: [master]
+    branches: [main]
     paths:
       - "services/pdf-api/**"
       - ".github/workflows/pdf-api-workflow.yml"
   pull_request:
-    branches: [master]
+    branches: [main]
     paths:
       - "services/pdf-api/**"
       - ".github/workflows/pdf-api-workflow.yml"
