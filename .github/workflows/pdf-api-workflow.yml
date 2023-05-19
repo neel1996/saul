@@ -1,0 +1,52 @@
+name: pdf-api workflow
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "services/pdf-api/**"
+      - ".github/workflows/pdf-api-workflow.yml"
+  pull_request:
+    branches: [master]
+    paths:
+      - "services/pdf-api/**"
+      - ".github/workflows/pdf-api-workflow.yml"
+
+jobs:
+  integration_test:
+    name: Integration test
+    runs-on: ubuntu-latest
+    env:
+      MINIO_ACCESS_KEY: minio
+      MINIO_SECRET_KEY: password
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build and run docker compose
+        run: docker-compose -f services/docker-compose.yml up -d
+
+      - name: Wait for services to start
+        run: sleep 30
+
+      - name: Setup python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.11"
+
+      - name: Install poppler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y poppler-utils
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r services/pdf-api/requirements.txt
+
+      - name: Run tests
+        run: |
+          python -m unittest services/pdf-api/test_convert_pdf_to_image.py
+
+      - name: Stop docker compose
+        run: docker-compose -f services/pdf-api/docker-compose.yml down
