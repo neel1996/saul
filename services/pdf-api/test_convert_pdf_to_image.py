@@ -4,9 +4,11 @@ from convert_pdf_to_image import convert
 from minio import Minio
 from config import config
 from kafka import KafkaConsumer, KafkaProducer
+from kafka.admin import KafkaAdminClient, NewTopic
 
 import os
 import json
+import logging
 
 
 class ConvertTestCase(unittest.TestCase):
@@ -14,6 +16,8 @@ class ConvertTestCase(unittest.TestCase):
     kafka_consumer = None
     kafka_producer = None
     checksum = None
+
+    logging.basicConfig(level=logging.INFO, format="TEST %(asctime)s - %(levelname)s : %(message)s")
 
     def delete_existing_objects(self):
         bucket_objects = self.minio_client.list_objects(config["minioBucket"], recursive=True)
@@ -54,6 +58,8 @@ class ConvertTestCase(unittest.TestCase):
 
         # Send event to Kafka
         self.kafka_producer.send("process-document", json.dumps({"checksum": self.checksum}).encode("utf-8"))
+        self.kafka_producer.flush()
+        self.kafka_producer.close()
 
         # Remove all objects from the Minio bucket
         if not self.minio_client.bucket_exists(config["minioBucket"]):
@@ -66,6 +72,8 @@ class ConvertTestCase(unittest.TestCase):
 
     # Tear down the test environment
     def tearDown(self):
+        KafkaAdminClient(bootstrap_servers="localhost:9092").delete_topics(
+            ["process-document"])
         self.kafka_consumer.close()
         self.kafka_producer.close()
         self.delete_existing_objects()
@@ -85,13 +93,8 @@ class ConvertTestCase(unittest.TestCase):
         self.assertEqual(len(list(objects)), 4)
 
         # Check if status was sent to Kafka
-        for message in kafka_consumer:
-            parsed_message = json.loads(message.value.decode("utf-8"))
-            self.assertEqual(parsed_message["checksum"], self.checksum)
-            self.assertEqual(parsed_message["status"], "success")
-            break
-
-        kafka_consumer.commit()
+        message = next(kafka_consumer)
+        self.assertEqual(json.loads(message.value.decode("utf-8")), {"checksum": self.checksum, "status": "success"})
 
 
 if __name__ == '__main__':

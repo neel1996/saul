@@ -35,10 +35,6 @@ minio_client = Minio(
 def convert(limit_messages=None):
     message_counter = 0
     for message in consumer:
-        if limit_messages is not None and message_counter == limit_messages:
-            logging.info("Reached message limit")
-            break
-
         message_counter += 1
         logging.info("Received message from Kafka: %s", message.value)
         parsed_message = json.loads(message.value.decode("utf-8"))
@@ -75,6 +71,11 @@ def convert(limit_messages=None):
             logging.info("Document with checksum %s converted successfully", checksum)
             consumer.commit()
             notify_status(checksum, "success")
+            if limit_messages is not None and message_counter >= limit_messages:
+                logging.info("Limit of %d messages reached", limit_messages)
+                consumer.commit()
+                consumer.close()
+                return
         except Exception as e:
             logging.error("Error during PDF conversion: %s", e)
             notify_status(checksum, "error")
