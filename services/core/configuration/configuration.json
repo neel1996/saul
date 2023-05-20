@@ -25,10 +25,27 @@
     "http://localhost:3000",
     "http://localhost:8080"
   ],
-  "authIgnoreUrls": [],
+  "authIgnoreUrls": ["/api/saul/v1/upload"],
   "huggingFace": {
     "documentQA": {
       "endpoint": "https://api-inference.huggingface.co/models/impira/layoutlm-document-qa"
     }
+  },
+  "kafka": {
+    "brokerURL": "localhost:9092",
+    "topics": {
+      "processDocument": {
+        "name": "process-document",
+        "groupId": "process-document-group"
+      },
+      "processDocumentStatus": {
+        "name": "process-document-status",
+        "groupId": "process-document-status-group"
+      }
+    }
+  },
+  "minio": {
+    "endPoint": "localhost:9000",
+    "bucket": "documents"
   }
 }

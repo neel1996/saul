@@ -17,6 +17,6 @@ func Bootstrap(config configuration.Configuration) {
 	InitializeMiddlewares(config, firebaseAuth)
 	InitializeClients(config, dynamoDb, firebaseAuth)
 	InitializeRepositories()
-	InitializeServices()
+	InitializeServices(config)
 	InitializeControllers()
 }

@@ -20,6 +20,7 @@ func InitializeRoutes(config configuration.Configuration) *gin.Engine {
 			})
 		})
 		group.POST("/login", loginController.Login)
+		group.POST("/upload", documentUploadController.UploadDocument)
 	}
 
 	return r

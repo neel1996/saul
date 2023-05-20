@@ -13,6 +13,7 @@ var (
 	UserNotFoundError            = Error{Code: "USER_NOT_FOUND", Message: "User not found"}
 	UserLoginError               = Error{Code: "USER_LOGIN_ERROR", Message: "Error occurred while logging in user"}
 	RequestValidationError       = Error{Code: "REQUEST_VALIDATION_ERROR", Message: "Invalid request"}
+	DocumentUploadError          = Error{Code: "DOCUMENT_UPLOAD_ERROR", Message: "Error occurred while uploading document"}
 )
 
 func (e Error) Error() string {
@@ -26,6 +27,7 @@ func (e Error) GetCode() int {
 		"USER_NOT_FOUND":              404,
 		"USER_LOGIN_ERROR":            500,
 		"REQUEST_VALIDATION_ERROR":    400,
+		"DOCUMENT_UPLOAD_ERROR":       500,
 	}
 
 	return errorCodeToHttpCodeMap[e.Code]
