@@ -4,7 +4,7 @@ from convert_pdf_to_image import convert
 from minio import Minio
 from config import config
 from kafka import KafkaConsumer, KafkaProducer
-from kafka.admin import KafkaAdminClient, NewTopic
+from kafka.admin import KafkaAdminClient
 
 import os
 import json
