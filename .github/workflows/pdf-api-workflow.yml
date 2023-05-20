@@ -48,4 +48,4 @@ jobs:
           python -m unittest test_convert_pdf_to_image.py
 
       - name: Stop docker compose
-        run: docker-compose -f services/pdf-api/docker-compose.yml down
+        run: docker-compose -f services/docker-compose.yml down
