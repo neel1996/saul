@@ -14,6 +14,7 @@ var (
 	UserLoginError               = Error{Code: "USER_LOGIN_ERROR", Message: "Error occurred while logging in user"}
 	RequestValidationError       = Error{Code: "REQUEST_VALIDATION_ERROR", Message: "Invalid request"}
 	DocumentUploadError          = Error{Code: "DOCUMENT_UPLOAD_ERROR", Message: "Error occurred while uploading document"}
+	InternalServerError          = Error{Code: "INTERNAL_SERVER_ERROR", Message: "Internal server error"}
 )
 
 func (e Error) Error() string {
@@ -28,6 +29,7 @@ func (e Error) GetCode() int {
 		"USER_LOGIN_ERROR":            500,
 		"REQUEST_VALIDATION_ERROR":    400,
 		"DOCUMENT_UPLOAD_ERROR":       500,
+		"INTERNAL_SERVER_ERROR":       500,
 	}
 
 	return errorCodeToHttpCodeMap[e.Code]

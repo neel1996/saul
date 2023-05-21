@@ -37,7 +37,11 @@ func (controller documentUploadController) UploadDocument(ctx *gin.Context) {
 	checksum, err := controller.documentUploadService.UploadDocument(ctx, fileBytes)
 	if err != nil {
 		logger.Errorf("Failed to upload document: %v", err)
-		e := err.(constants.Error)
+		e, ok := err.(constants.Error)
+		if !ok {
+			ctx.JSON(500, constants.InternalServerError)
+			return
+		}
 		ctx.JSON(e.GetGinResponse())
 		return
 	}
