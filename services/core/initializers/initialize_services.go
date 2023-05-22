@@ -7,8 +7,9 @@ import (
 )
 
 var (
-	loginService          service.UserLoginService
-	documentUploadService service.DocumentUploadService
+	loginService            service.UserLoginService
+	documentUploadService   service.DocumentUploadService
+	documentAnalyzerService service.DocumentAnalyzerService
 )
 
 func InitializeServices(config configuration.Configuration) {
@@ -16,4 +17,5 @@ func InitializeServices(config configuration.Configuration) {
 
 	documentDetailsProducer := kafka.NewDocumentDetailsProducer(config)
 	documentUploadService = service.NewDocumentUploadService(config, minioClient, documentDetailsProducer)
+	documentAnalyzerService = service.NewDocumentAnalyzerService(config, minioClient, huggingFaceDocumentQAClient)
 }

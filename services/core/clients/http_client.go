@@ -3,6 +3,7 @@ package clients
 //go:generate mockgen -source=http_client.go -destination=../mocks/mock_http_client.go -package=mocks
 
 import (
+	"core/log"
 	"encoding/json"
 	"github.com/go-playground/validator/v10"
 	"github.com/go-resty/resty/v2"
@@ -18,6 +19,8 @@ type HttpClient interface {
 	WithHeaders(parameters map[string]string) HttpClient
 	WithResponse(response interface{}) HttpClient
 }
+
+var logger = log.NewLogger()
 
 type httpClient struct {
 	request  *resty.Request
@@ -71,7 +74,8 @@ func (h httpClient) WithBody(body interface{}) HttpClient {
 
 	err := validator.New().Struct(body)
 	if err != nil {
-		return nil
+		logger.Errorf("Error validating request body: %v", err)
+		return h
 	}
 
 	h.request.SetBody(body)
@@ -110,11 +114,6 @@ func (h httpClient) bindResponse(err error, response *resty.Response) error {
 	}
 
 	err = json.Unmarshal(response.Body(), h.response)
-	if err != nil {
-		return err
-	}
-
-	err = validator.New().Struct(h.response)
 	if err != nil {
 		return err
 	}

@@ -8,6 +8,7 @@ import (
 	"core/log"
 	"core/model/request"
 	"core/model/response"
+	"github.com/sirupsen/logrus"
 	"os"
 )
 
@@ -21,7 +22,7 @@ type documentQAClient struct {
 }
 
 func (d documentQAClient) Answer(ctx context.Context, question string, imageBase64 string) (response.DocumentQAResponse, error) {
-	logger := log.NewLogger(ctx)
+	logger := log.NewLogger(ctx).WithFields(logrus.Fields{"question": question})
 	req := request.DocumentQARequest{
 		Inputs: request.Inputs{
 			Question: question,
