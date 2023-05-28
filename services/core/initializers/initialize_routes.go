@@ -1,16 +1,21 @@
 package initializers
 
 import (
+	"context"
 	"core/configuration"
-	"core/log"
 	"core/middleware"
+	"core/model/request"
+	"encoding/json"
 	"github.com/gin-gonic/gin"
+	socketio "github.com/googollee/go-socket.io"
+	"log"
 )
 
 func InitializeRoutes(config configuration.Configuration) *gin.Engine {
 	r := gin.Default()
-	r.Use(authMiddleware.Authenticate)
-	setupCORS(config, r)
+	//r.Use(authMiddleware.Authenticate)
+	middleware.CorsMiddleware(r, config)
+	initializeSocket(r)
 
 	group := r.Group("/api/saul/v1")
 	{
@@ -26,20 +31,57 @@ func InitializeRoutes(config configuration.Configuration) *gin.Engine {
 	return r
 }
 
-func setupCORS(config configuration.Configuration, r *gin.Engine) gin.IRoutes {
-	return r.Use(func(context *gin.Context) {
-		logger := log.NewLogger(context)
-		for _, ignoreUrl := range config.CorsIgnoreUrls {
-			if context.Request.URL.Path == ignoreUrl {
-				logger.Infof("%s is not part of secure list. Ignoring CORS", ignoreUrl)
-				context.Next()
-				return
-			}
+func initializeSocket(r *gin.Engine) {
+	server := socketio.NewServer(nil)
+
+	server.OnConnect("/", func(s socketio.Conn) error {
+		s.SetContext("")
+		log.Println("connected:", s.ID())
+
+		return nil
+	})
+
+	server.OnError("/", func(s socketio.Conn, e error) {
+		log.Println("meet error:", e)
+	})
+
+	server.OnEvent("/", "join", func(s socketio.Conn, msg string) {
+		log.Println("join:", msg)
+		s.Join(msg)
+		s.Emit("joined", msg)
+	})
+
+	server.OnDisconnect("/", func(s socketio.Conn, reason string) {
+		log.Println("closed", reason)
+	})
+
+	server.OnEvent("/", "message", func(s socketio.Conn, msg string) {
+		log.Println("message:", msg)
+
+		var req request.DocumentQaSocketMessage
+		err := json.Unmarshal([]byte(msg), &req)
+		if err != nil {
+			log.Println("error unmarshalling message:", err.Error())
+			return
 		}
 
-		logger.Infof("Setting up CORS for %s", context.Request.URL.Path)
-		middleware.CorsMiddleware(r, config)
-		context.Next()
-		return
+		answer, err := documentAnalyzerService.AnalyzeDocument(context.Background(), req.DocumentId, req.Question)
+		if err != nil {
+			log.Println("error analyzing document:", err.Error())
+			return
+		}
+
+		b, err := json.Marshal(answer)
+		if err != nil {
+			log.Println("error marshalling answer:", err.Error())
+			return
+		}
+
+		s.Emit("answer", string(b))
 	})
+
+	go server.Serve()
+
+	r.GET("/saul/socket.io/*any", gin.WrapH(server))
+	r.POST("/saul/socket.io/*any", gin.WrapH(server))
 }

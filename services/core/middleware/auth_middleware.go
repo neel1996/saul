@@ -41,7 +41,7 @@ func (middleware authMiddleware) Authenticate(ctx *gin.Context) {
 	}
 
 	idToken = strings.Replace(idToken, "Bearer ", "", 1)
-	token, err := middleware.authClient.VerifyIDToken(ctx, idToken)
+	token, err := middleware.authClient.VerifyIDTokenAndCheckRevoked(ctx, idToken)
 	if err != nil {
 		logger.Errorf("Error verifying token: %s", err.Error())
 		ctx.AbortWithStatus(http.StatusUnauthorized)

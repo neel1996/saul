@@ -26,6 +26,8 @@ type documentAnalyzerService struct {
 	huggingFaceClient hugging_face.DocumentQAClient
 }
 
+var answers []response.LayoutLMAnswer
+
 func (service documentAnalyzerService) AnalyzeDocument(ctx context.Context, checksum string, question string) (response.LayoutLMAnswer, error) {
 	logger := log.NewLogger().WithFields(logrus.Fields{"checksum": checksum, "question": question})
 	logger.Info("Analyzing document")
@@ -46,22 +48,30 @@ func (service documentAnalyzerService) AnalyzeDocument(ctx context.Context, chec
 		imagePaths = append(imagePaths, image.Key)
 	}
 
-	var answers []response.LayoutLMAnswer
 	wg.Add(len(imagePaths))
 	for _, imagePath := range imagePaths {
-		go service.getAnswerFromInferenceAPI(ctx, answers, imagePath, question, wg)
+		go service.getAnswerFromInferenceAPI(ctx, imagePath, question, wg)
 	}
 	wg.Wait()
 
+	// sort answers in descending order by score
+	sort.Slice(answers, func(i, j int) bool {
+		return answers[i].Score > answers[j].Score
+	})
+
 	if len(answers) > 0 {
-		return answers[0], nil
+		logger.Infof("Found answer: %s", answers[0].Answer)
+		pickedAnswer := answers[0]
+		answers = nil
+		return pickedAnswer, nil
 	}
 
 	logger.Info("No answer found")
+	answers = nil
 	return response.LayoutLMAnswer{}, constants.DocumentQANoAnswerFoundError
 }
 
-func (service documentAnalyzerService) getAnswerFromInferenceAPI(ctx context.Context, answers []response.LayoutLMAnswer, imagePath string, question string, wg *sync.WaitGroup) {
+func (service documentAnalyzerService) getAnswerFromInferenceAPI(ctx context.Context, imagePath string, question string, wg *sync.WaitGroup) {
 	logger := log.NewLogger()
 	defer wg.Done()
 
@@ -96,11 +106,6 @@ func (service documentAnalyzerService) getAnswerFromInferenceAPI(ctx context.Con
 	answers = append(answers, response.LayoutLMAnswer{
 		Score:  answer.Score,
 		Answer: answer.Answer,
-	})
-
-	// sort answers in descending order by score
-	sort.Slice(answers, func(i, j int) bool {
-		return answers[i].Score > answers[j].Score
 	})
 }
 

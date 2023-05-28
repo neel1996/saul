@@ -16,7 +16,7 @@ export default function Options() {
         loginPromise
             .then(() => {
                 setShowLoader(false);
-                return navigate("/dashboard");
+                return navigate("/document-upload");
             })
             .catch((err) => {
                 setShowLoader(false);

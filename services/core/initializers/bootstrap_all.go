@@ -21,5 +21,5 @@ func Bootstrap(config configuration.Configuration) {
 	InitializeServices(config)
 	InitializeControllers()
 
-	go consumers.NewDocumentStatusConsumer(config, documentAnalyzerService).ConsumeDocumentStatus()
+	go consumers.NewDocumentStatusConsumer(config, documentAnalyzerService).ConsumeDocumentStatus(nil)
 }

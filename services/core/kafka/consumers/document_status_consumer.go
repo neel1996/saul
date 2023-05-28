@@ -7,11 +7,12 @@ import (
 	"core/model"
 	"core/service"
 	"encoding/json"
+	"github.com/googollee/go-socket.io"
 	"github.com/segmentio/kafka-go"
 )
 
 type DocumentStatusConsumer interface {
-	ConsumeDocumentStatus()
+	ConsumeDocumentStatus(socket socketio.Conn)
 }
 
 type documentStatusConsumer struct {
@@ -20,9 +21,16 @@ type documentStatusConsumer struct {
 	documentAnalyzer service.DocumentAnalyzerService
 }
 
-func (consumer documentStatusConsumer) ConsumeDocumentStatus() {
+func (consumer documentStatusConsumer) ConsumeDocumentStatus(socket socketio.Conn) {
 	logger := log.NewLogger()
 	logger.Info("Consuming document status from Kafka")
+
+	defer func() {
+		err := consumer.kafkaReader.Close()
+		if err != nil {
+			logger.Errorf("Failed to close Kafka reader: %v", err)
+		}
+	}()
 
 	for {
 		m, err := consumer.kafkaReader.ReadMessage(context.Background())
@@ -45,6 +53,9 @@ func (consumer documentStatusConsumer) ConsumeDocumentStatus() {
 			logger.Infof("Skipping document status with status %v", status.Status)
 			continue
 		}
+
+		socket.Join(status.Checksum)
+		socket.Emit("document_status", status)
 	}
 }
 

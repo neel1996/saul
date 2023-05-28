@@ -25,7 +25,9 @@
     "http://localhost:3000",
     "http://localhost:8080"
   ],
-  "authIgnoreUrls": ["/api/saul/v1/upload"],
+  "authIgnoreUrls": [
+    "/health"
+  ],
   "huggingFace": {
     "documentQA": {
       "endpoint": "https://api-inference.huggingface.co/models/impira/layoutlm-document-qa"

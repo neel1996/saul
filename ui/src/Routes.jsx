@@ -1,4 +1,4 @@
-import { Login, Dashboard } from "@pages";
+import { Login, DocumentUpload, Document } from "@pages";
 import {
     Route,
     createBrowserRouter,
@@ -10,7 +10,8 @@ export const router = createBrowserRouter(
     createRoutesFromElements(
         <Route path="/">
             <Route path="/login" element={<Login />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/document-upload" element={<DocumentUpload />} />
+            <Route path="/document-qa" element={<Document />} />
             <Route path="*" element={<Navigate to="/login" replace />} />
         </Route>
     )
