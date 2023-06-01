@@ -1,5 +1,7 @@
 package hugging_face
 
+//go:generate mockgen -source=document_qa_client.go -destination=../../mocks/mock_document_qa_client.go -package=mocks
+
 import (
 	"context"
 	"core/clients"

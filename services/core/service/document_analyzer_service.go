@@ -3,17 +3,14 @@ package service
 import (
 	"context"
 	"core/clients"
-	"core/clients/hugging_face"
 	"core/configuration"
 	"core/constants"
 	"core/log"
 	"core/model/response"
-	"encoding/base64"
 	"fmt"
 	"github.com/minio/minio-go/v7"
 	"github.com/sirupsen/logrus"
 	"sort"
-	"sync"
 )
 
 type DocumentAnalyzerService interface {
@@ -21,17 +18,50 @@ type DocumentAnalyzerService interface {
 }
 
 type documentAnalyzerService struct {
-	config            configuration.Configuration
-	minioClient       clients.MinioClient
-	huggingFaceClient hugging_face.DocumentQAClient
+	config           configuration.Configuration
+	minioClient      clients.MinioClient
+	inferenceService InferenceService
 }
 
-var answers []response.LayoutLMAnswer
-
 func (service documentAnalyzerService) AnalyzeDocument(ctx context.Context, checksum string, question string) (response.LayoutLMAnswer, error) {
+	var answers []response.LayoutLMAnswer
+
 	logger := log.NewLogger().WithFields(logrus.Fields{"checksum": checksum, "question": question})
 	logger.Info("Analyzing document")
-	wg := new(sync.WaitGroup)
+
+	imagePaths, err := service.imagePaths(ctx, checksum)
+	if err != nil {
+		return response.LayoutLMAnswer{}, err
+	}
+
+	channel := make(chan response.LayoutLMAnswer, len(imagePaths))
+	for _, imagePath := range imagePaths {
+		go service.inferenceService.GetAnswersFromInferenceAPI(ctx, imagePath, question, channel)
+	}
+
+	for i := 0; i < len(imagePaths); i++ {
+		answer := <-channel
+		if answer.Err != nil {
+			logger.WithError(answer.Err).Error("Error getting answer from inference API")
+			continue
+		}
+
+		if answer.Answer != "" {
+			answers = append(answers, answer)
+		}
+	}
+
+	if len(answers) == 0 {
+		logger.Info("No answer found")
+		return response.LayoutLMAnswer{}, constants.DocumentQANoAnswerFoundError
+	}
+
+	return service.accurateAnswer(answers), nil
+}
+
+func (service documentAnalyzerService) imagePaths(ctx context.Context, checksum string) ([]string, error) {
+	logger := log.NewLogger()
+	logger.Info("Fetching image list from Minio")
 
 	images := service.minioClient.ListObjects(ctx, service.config.Minio.Bucket, minio.ListObjectsOptions{
 		Recursive: true,
@@ -42,81 +72,39 @@ func (service documentAnalyzerService) AnalyzeDocument(ctx context.Context, chec
 	for image := range images {
 		if image.Err != nil {
 			logger.WithError(image.Err).Error("Error listing images")
-			return response.LayoutLMAnswer{}, image.Err
+			return nil, image.Err
 		}
 
 		imagePaths = append(imagePaths, image.Key)
 	}
 
-	wg.Add(len(imagePaths))
-	for _, imagePath := range imagePaths {
-		go service.getAnswerFromInferenceAPI(ctx, imagePath, question, wg)
-	}
-	wg.Wait()
+	logger.Infof("Found %d images", len(imagePaths))
+	return imagePaths, nil
+}
+
+func (service documentAnalyzerService) accurateAnswer(answers []response.LayoutLMAnswer) response.LayoutLMAnswer {
+	logger := log.NewLogger()
+	logger.Info("Picking most accurate answer")
 
 	// sort answers in descending order by score
 	sort.Slice(answers, func(i, j int) bool {
 		return answers[i].Score > answers[j].Score
 	})
 
-	if len(answers) > 0 {
-		logger.Infof("Found answer: %s", answers[0].Answer)
-		pickedAnswer := answers[0]
-		answers = nil
-		return pickedAnswer, nil
-	}
+	pickedAnswer := answers[0]
 
-	logger.Info("No answer found")
-	answers = nil
-	return response.LayoutLMAnswer{}, constants.DocumentQANoAnswerFoundError
-}
-
-func (service documentAnalyzerService) getAnswerFromInferenceAPI(ctx context.Context, imagePath string, question string, wg *sync.WaitGroup) {
-	logger := log.NewLogger()
-	defer wg.Done()
-
-	object, err := service.minioClient.GetObject(ctx, service.config.Minio.Bucket, imagePath)
-	if err != nil {
-		logger.Errorf("Error getting image from Minio: %v", err)
-		return
-	}
-	defer object.Close()
-
-	objectInfo, err := object.Stat()
-	if err != nil || objectInfo.Size == 0 {
-		logger.Errorf("Error getting image info from Minio: %v", err)
-		return
-	}
-
-	logger.Infof("Reading %d bytes from Minio", objectInfo.Size)
-	b := make([]byte, objectInfo.Size)
-	for {
-		_, err = object.Read(b)
-		if err != nil {
-			break
-		}
-	}
-
-	answer, err := service.huggingFaceClient.Answer(ctx, question, base64.StdEncoding.EncodeToString(b))
-	if err != nil {
-		logger.WithError(err).Error("Error getting answer from inference API")
-		return
-	}
-
-	answers = append(answers, response.LayoutLMAnswer{
-		Score:  answer.Score,
-		Answer: answer.Answer,
-	})
+	logger.Infof("Found answer: %s", pickedAnswer.Answer)
+	return pickedAnswer
 }
 
 func NewDocumentAnalyzerService(
 	config configuration.Configuration,
 	minioClient clients.MinioClient,
-	huggingFaceClient hugging_face.DocumentQAClient,
+	inferenceService InferenceService,
 ) DocumentAnalyzerService {
 	return documentAnalyzerService{
-		config:            config,
-		minioClient:       minioClient,
-		huggingFaceClient: huggingFaceClient,
+		config:           config,
+		minioClient:      minioClient,
+		inferenceService: inferenceService,
 	}
 }
