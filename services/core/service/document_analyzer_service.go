@@ -1,5 +1,7 @@
 package service
 
+//go:generate mockgen -destination=../mocks/mock_document_analyzer_service.go -package=mocks -source=document_analyzer_service.go
+
 import (
 	"context"
 	"core/clients"

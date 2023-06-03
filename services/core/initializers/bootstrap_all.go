@@ -4,7 +4,6 @@ import (
 	"context"
 	"core/configuration"
 	"core/dynamodb/migrations"
-	"core/kafka/consumers"
 )
 
 func Bootstrap(config configuration.Configuration) {
@@ -20,6 +19,4 @@ func Bootstrap(config configuration.Configuration) {
 	InitializeRepositories()
 	InitializeServices(config)
 	InitializeControllers()
-
-	go consumers.NewDocumentStatusConsumer(config, documentAnalyzerService).ConsumeDocumentStatus(nil)
 }

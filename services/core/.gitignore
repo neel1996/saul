@@ -1,7 +1,7 @@
 .env
 service-account.json
 
-mocks/
+mocks/mock_*.go
 vendor/
 .run/
 
