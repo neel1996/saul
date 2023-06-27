@@ -87,10 +87,10 @@ class ConvertTestCase(unittest.TestCase):
         convert(limit_messages=1)
 
         self.assertTrue(minio_client.bucket_exists(config["minioBucket"]))
-        objects = minio_client.list_objects(config["minioBucket"], recursive=True)
+        objects = minio_client.list_objects(config["minioBucket"], recursive=True, prefix=f"{self.checksum}/images")
 
         # Check that the images were uploaded to Minio
-        self.assertEqual(len(list(objects)), 4)
+        self.assertEqual(len(list(objects)), 1)
 
         # Check if status was sent to Kafka
         message = next(kafka_consumer)

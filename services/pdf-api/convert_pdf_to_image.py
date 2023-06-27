@@ -5,11 +5,16 @@ from kafka import KafkaConsumer
 from minio import Minio
 from config import config
 from pdf2image import convert_from_bytes
+
+from torchvision.utils import make_grid
+from torchvision.transforms import transforms
 from status_notification_service import notify_status
 
 import os
 import logging
 import tempfile
+import constants
+import torchvision.transforms.v2
 
 consumer = KafkaConsumer(
     config["kafka"]["topic"],
@@ -18,8 +23,8 @@ consumer = KafkaConsumer(
     auto_offset_reset="earliest",
 )
 
-access_key = os.getenv("MINIO_ACCESS_KEY")
-access_secret = os.getenv("MINIO_SECRET_KEY")
+access_key = os.getenv("MINIO_ACCESS_KEY", "minio")
+access_secret = os.getenv("MINIO_SECRET_KEY", "password")
 if access_key is None or access_secret is None:
     logging.error("Minio credentials not set")
     exit(1)
@@ -51,21 +56,14 @@ def convert(limit_messages=None):
                 return
 
             logging.info("Retrieving document with checksum %s", checksum)
-            response = minio_client.get_object(bucket, "{}/document.pdf".format(checksum))
+            response = minio_client.get_object(bucket, f"{checksum}/{constants.default_document_name}")
             document = response.read()
 
             logging.info("Converting document with checksum %s to images", checksum)
             images = convert_from_bytes(document, 200, fmt="jpeg", output_folder=None)
 
             logging.info("Uploading images to Minio")
-            for i, image in enumerate(images):
-                with tempfile.TemporaryDirectory() as tmpdirname:
-                    image.save("{}/page-{}.jpg".format(tmpdirname, i), "JPEG")
-                    minio_client.fput_object(
-                        bucket,
-                        "{}/images/page-{}.jpg".format(checksum, i),
-                        "{}/page-{}.jpg".format(tmpdirname, i),
-                    )
+            store_pdf_as_image(bucket, checksum, images)
 
             logging.info("Successfully uploaded %d images to Minio", len(images))
             logging.info("Document with checksum %s converted successfully", checksum)
@@ -88,3 +86,26 @@ def convert(limit_messages=None):
             else:
                 response.close()
                 response.release_conn()
+
+
+def store_pdf_as_image(bucket, checksum, images):
+    transform = transforms.Compose([transforms.PILToTensor()])
+    tensors = []
+
+    logging.info("Generating image grid")
+    for i, image in enumerate(images):
+        tensors.append(transform(image))
+
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        file_name = f"{tmpdirname}/{constants.image_file_name}"
+
+        logging.info("Saving image grid to %s", file_name)
+        grid = make_grid(tensors, nrow=4, padding=5)
+        torchvision.transforms.ToPILImage()(grid).save(file_name)
+
+        logging.info("Uploading image grid to Minio")
+        minio_client.fput_object(
+            bucket,
+            f"{checksum}/images/{constants.image_file_name}",
+            f"{tmpdirname}/{constants.image_file_name}",
+        )
